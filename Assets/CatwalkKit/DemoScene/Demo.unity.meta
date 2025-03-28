@@ -1,0 +1,15 @@
+fileFormatVersion: 2
+guid: d7ea99b7efde34044bd3cd6596b88b41
+timeCreated: 1557938634
+licenseType: Store
+DefaultImporter:
+  userData: 
+  assetBundleName: 
+  assetBundleVariant: 
+AssetOrigin:
+  serializedVersion: 1
+  productId: 146383
+  packageName: Industrial Catwalk Kit
+  packageVersion: 1.0
+  assetPath: Assets/CatwalkKit/DemoScene/Demo.unity
+  uploadId: 311022
