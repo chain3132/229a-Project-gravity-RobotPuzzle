@@ -14,6 +14,7 @@ public class CharacterMovement : MonoBehaviour
     private Rigidbody rb;
     private bool isPulling = false;
     private bool isGrounded;
+    private bool isRunning;
     private bool isJumping;
     private FixedJoint joint; // Joint to attach to objects
     private Rigidbody pullingObjectRB;
@@ -28,33 +29,19 @@ public class CharacterMovement : MonoBehaviour
 
     void Update()
     {
+        
         MoveCharacter();
-        Jump();
-        // PullObject();
         HandlePulling();
+        Running();
         
     }
 
     private void FixedUpdate()
     {
-        // ApplyGravity();
+        Jump();
     }
 
-    // private void PullObject()
-    // {
-    //     if (Input.GetKeyDown(KeyCode.E))
-    //     {
-    //         if (isPulling)
-    //         {
-    //             isPulling = false;
-    //             animator.SetBool("isPulling", false);
-    //             return;
-    //         }
-    //         isPulling = true;
-    //         animator.SetTrigger("Pulling");
-    //         animator.SetBool("isPulling", true);
-    //     }
-    // }
+
     void HandlePulling()
     {
         if (Input.GetKeyDown(KeyCode.E))
@@ -93,6 +80,12 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
+    private void OnDrawGizmos()
+    {
+        Gizmos.color = Color.red;
+        Gizmos.DrawWireSphere(handPosition.position, 1f);
+    }
+
     void ReleaseBox()
     {
         if (joint != null)
@@ -115,38 +108,37 @@ public class CharacterMovement : MonoBehaviour
     }
     void MoveCharacter()
     {
+        if (isRunning)
+        {
+            return;
+        }
+        
         if (isPulling)
         {
             if (pullingObjectRB != null)
             {
                 Vector3 directionToBox = (pullingObjectRB.transform.position - transform.position).normalized;
                 directionToBox.y = 0f; // Ignore vertical movement
-
-                // Player can only move backward (opposite direction of pulling direction)
                 float vertical = Input.GetAxis("Vertical");
-
-                // Only allow backward movement (negative direction)
-                if (vertical < 0) // If pressing back (negative)
+                if (vertical < 0) 
                 {
                     // Move backward along the direction to the box
                     // Calculate the force needed to pull the object
                     // F = ma => F = (mass of object) * (acceleration)
                     float objectMass = pullingObjectRB.mass; // Get the mass of the object
                     float acceleration = moveSpeed / playerMass; // Use the player's mass to calculate acceleration
-
+                    
                     // Newton's Law: Force to move the player backward = mass * acceleration
                     float forceMagnitude = (objectMass * acceleration) ; // Apply a constant to scale force
-
+                    Debug.Log(forceMagnitude);
                     // Apply force to move the player backward
                     Vector3 moveDirection = -directionToBox * Mathf.Abs(vertical); // Move backward
-                    rb.AddForce(moveDirection * forceMagnitude, ForceMode.Force);
-
-                    // Update animation state
+                    rb.AddForce(moveDirection * forceMagnitude , ForceMode.Force);
+                    
                     animator.SetBool("isMoving", true);
                 }
                 else
                 {
-                    // If the player tries to move forward, do nothing
                     animator.SetBool("isMoving", false);
                 }
             }
@@ -172,6 +164,26 @@ public class CharacterMovement : MonoBehaviour
         }
     }
 
+    void Running()
+    {
+        float horizontal = Input.GetAxis("Horizontal");
+        float vertical = Input.GetAxis("Vertical");
+        Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
+        if (direction.magnitude >= 0.1f && Input.GetKey(KeyCode.LeftShift))
+        {
+            float targetAngle = Mathf.Atan2(direction.x, direction.z) * Mathf.Rad2Deg + cam.eulerAngles.y;
+            transform.rotation = Quaternion.Euler(0f, targetAngle, 0f);
+            Vector3 moveDir = Quaternion.Euler(0f, targetAngle, 0f) * Vector3.forward;
+            rb.MovePosition(transform.position + moveDir * (moveSpeed*2) * Time.deltaTime);
+            isRunning = true;
+            animator.SetBool("isRunning", true);
+        }
+        else
+        {
+            isRunning = false;
+            animator.SetBool("isRunning", false);
+        }
+    }
     void ApplyGravity()
     {
         isGrounded = Physics.Raycast(transform.position, Vector3.down, 0.5f); 

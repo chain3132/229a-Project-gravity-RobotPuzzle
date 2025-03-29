@@ -6,7 +6,7 @@ public class ThirdPersonCamera : MonoBehaviour
     public Vector3 offset;
     public float smoothSpeed = 5f;
 
-    void LateUpdate()
+    void FixedUpdate()
     {
         if (!target) return;
 
