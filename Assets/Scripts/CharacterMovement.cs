@@ -16,7 +16,7 @@ public class CharacterMovement : MonoBehaviour
     private bool isGrounded;
     private bool isRunning;
     private bool isJumping;
-    private FixedJoint joint; // Joint to attach to objects
+    private ConfigurableJoint joint; // Joint to attach to objects
     private Rigidbody pullingObjectRB;
     private float playerMass;
 
@@ -69,8 +69,14 @@ public class CharacterMovement : MonoBehaviour
                 {
                     pullingObjectRB = boxRB;
                     // Create joint to attach box to player
-                    joint = pullingObjectRB.gameObject.AddComponent<FixedJoint>();
+                    joint = pullingObjectRB.gameObject.AddComponent<ConfigurableJoint>();
                     joint.connectedBody = rb;
+                    joint.xMotion = ConfigurableJointMotion.Locked;
+                    joint.yMotion = ConfigurableJointMotion.Locked;
+                    joint.zMotion = ConfigurableJointMotion.Locked;
+                    joint.angularXMotion = ConfigurableJointMotion.Limited;
+                    joint.angularYMotion = ConfigurableJointMotion.Limited;
+                    joint.angularZMotion = ConfigurableJointMotion.Limited;
                     isPulling = true;
                     animator.SetTrigger("Pulling");
                     animator.SetBool("isPulling", true);
@@ -119,21 +125,27 @@ public class CharacterMovement : MonoBehaviour
             {
                 Vector3 directionToBox = (pullingObjectRB.transform.position - transform.position).normalized;
                 directionToBox.y = 0f; // Ignore vertical movement
-                float vertical = Input.GetAxis("Vertical");
+                float vertical = (Input.GetKey(KeyCode.W) ? 1f : 0f) - (Input.GetKey(KeyCode.S) ? 1f : 0f);
+                // Move backward along the direction to the box
+                // Calculate the force needed to pull the object
+                // F = ma => F = (mass of object) * (acceleration)
+                float objectMass = pullingObjectRB.mass; // Get the mass of the object
+                float acceleration = moveSpeed / playerMass; // Use the player's mass to calculate acceleration
+                    
+                // Newton's Law: Force to move the player backward = mass * acceleration
+                float forceMagnitude = (objectMass * acceleration) ; // Apply a constant to scale force
                 if (vertical < 0) 
                 {
-                    // Move backward along the direction to the box
-                    // Calculate the force needed to pull the object
-                    // F = ma => F = (mass of object) * (acceleration)
-                    float objectMass = pullingObjectRB.mass; // Get the mass of the object
-                    float acceleration = moveSpeed / playerMass; // Use the player's mass to calculate acceleration
-                    
-                    // Newton's Law: Force to move the player backward = mass * acceleration
-                    float forceMagnitude = (objectMass * acceleration) ; // Apply a constant to scale force
-                    Debug.Log(forceMagnitude);
                     // Apply force to move the player backward
                     Vector3 moveDirection = -directionToBox * Mathf.Abs(vertical); // Move backward
-                    rb.AddForce(moveDirection * forceMagnitude , ForceMode.Force);
+                    rb.AddForce(moveDirection * forceMagnitude , ForceMode.Acceleration);
+                    
+                    animator.SetBool("isMoving", true);
+                }
+                else if (vertical > 0)
+                {
+                    Vector3 moveDirection = directionToBox * Mathf.Abs(vertical); // Move backward
+                    rb.AddForce(moveDirection * forceMagnitude , ForceMode.Acceleration);
                     
                     animator.SetBool("isMoving", true);
                 }
@@ -146,7 +158,7 @@ public class CharacterMovement : MonoBehaviour
         else
         {
             float horizontal = Input.GetAxis("Horizontal");
-            float vertical = Input.GetAxis("Vertical");
+            float vertical = (Input.GetKey(KeyCode.W) ? 1f : 0f) - (Input.GetKey(KeyCode.S) ? 1f : 0f);
             Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
             if (direction.magnitude >= 0.1f)
             {
@@ -167,7 +179,7 @@ public class CharacterMovement : MonoBehaviour
     void Running()
     {
         float horizontal = Input.GetAxis("Horizontal");
-        float vertical = Input.GetAxis("Vertical");
+        float vertical = (Input.GetKey(KeyCode.W) ? 1f : 0f) - (Input.GetKey(KeyCode.S) ? 1f : 0f);
         Vector3 direction = new Vector3(horizontal, 0f, vertical).normalized;
         if (direction.magnitude >= 0.1f && Input.GetKey(KeyCode.LeftShift))
         {

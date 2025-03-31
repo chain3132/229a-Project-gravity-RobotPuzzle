@@ -5,6 +5,9 @@ public class objPush : MonoBehaviour
 {
     private Rigidbody rb;
     [SerializeField]private GameObject textPush;
+    private float playerMass; // Get the mass of the object
+    float acceleration;
+    private bool enter = false;
     private void Awake()
     {
         rb = GetComponent<Rigidbody>();
@@ -14,38 +17,38 @@ public class objPush : MonoBehaviour
         
         if (other.gameObject.CompareTag("Player"))
         {
-            
             textPush.SetActive(true);
         }
-        
-        if (other.gameObject.CompareTag("Player")&& Input.GetKeyDown(KeyCode.F))
+        if ( Input.GetKeyDown(KeyCode.F) && other.gameObject.CompareTag("Player"))
         {
-            Debug.Log("Pushing object");
-            // float playerMass = other.gameObject.GetComponent<Rigidbody>().mass; // Get the mass of the object
-            // float acceleration = other.gameObject.GetComponent<CharacterMovement>().moveSpeed / objectMass;
-            rb.AddForce(-transform.forward * 50f, ForceMode.Impulse);
-            
+            playerMass = other.gameObject.GetComponent<Rigidbody>().mass;
+            acceleration = other.gameObject.GetComponent<CharacterMovement>().moveSpeed / rb.mass;
+            enter = true;
         }
     }
     private void OnCollisionStay(Collision other)
     {
-        
-        if (other.gameObject.CompareTag("Player"))
+        if (Input.GetKeyDown(KeyCode.F) && other.gameObject.CompareTag("Player"))
         {
-            
-            textPush.SetActive(true);
-        }
-        if (other.gameObject.CompareTag("Player")&& Input.GetKeyDown(KeyCode.F))
-        {
-            // float objectMass = pullingObjectRB.mass; // Get the mass of the object
-            // float acceleration = moveSpeed / playerMass;
-            Debug.Log("Pushing object");
-            rb.AddForce(-transform.forward * 50f, ForceMode.Impulse);
-            
+            playerMass = other.gameObject.GetComponent<Rigidbody>().mass;
+            acceleration = other.gameObject.GetComponent<CharacterMovement>().moveSpeed / rb.mass;
+            enter = true;
         }
     }
+
+    private void Update()
+    {
+        if (enter)
+        {
+            Debug.Log("Pushing object");
+            
+            rb.AddForce(-transform.forward *(rb.mass * acceleration ) , ForceMode.Impulse);
+        }
+    }
+
     private void OnCollisionExit(Collision other)
     {
+        enter = false;
         textPush.SetActive(false);
     }
 }

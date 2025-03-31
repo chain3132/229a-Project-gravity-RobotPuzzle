@@ -1377,22 +1377,6 @@ PrefabInstance:
       propertyPath: m_Name
       value: Picolabo
       objectReference: {fileID: 0}
-    - target: {fileID: 311123415865099263, guid: 6095c0d0d442fbe40b71b35071248fb7, type: 3}
-      propertyPath: m_TagString
-      value: Player
-      objectReference: {fileID: 0}
-    - target: {fileID: 3698447287683040418, guid: 6095c0d0d442fbe40b71b35071248fb7, type: 3}
-      propertyPath: m_Mass
-      value: 2
-      objectReference: {fileID: 0}
-    - target: {fileID: 3698447287683040418, guid: 6095c0d0d442fbe40b71b35071248fb7, type: 3}
-      propertyPath: m_Constraints
-      value: 112
-      objectReference: {fileID: 0}
-    - target: {fileID: 3698447287683040418, guid: 6095c0d0d442fbe40b71b35071248fb7, type: 3}
-      propertyPath: m_CollisionDetection
-      value: 0
-      objectReference: {fileID: 0}
     - target: {fileID: 6062987881634888722, guid: 6095c0d0d442fbe40b71b35071248fb7, type: 3}
       propertyPath: m_LocalPosition.x
       value: 6.45
